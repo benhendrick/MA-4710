@@ -6,7 +6,7 @@ model <- lm(V1~V2, data = CH01PR19)
 model
 
 # Part B
-plot(CH01PR19)
+plot(x = CH01PR19$V2, y = CH01PR19$V1)
 abline(model)
 
 # Part C

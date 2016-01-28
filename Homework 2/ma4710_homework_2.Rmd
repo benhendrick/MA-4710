@@ -1,0 +1,170 @@
+---
+title: "MA 4710 Homework 2"
+author: "Benjamin Hendrick"
+date: "Wednesday, January 27, 2016"
+output: pdf_document
+---
+
+# Problem 1.18
+
+The sum of the normal errors $\epsilon_{i}$ would equal zero. By the central limit theorem, the mean of the normally distributed errors is 0. If the mean of the errors is computed $\frac{1}{n}\sum \epsilon_{i}$, then the sum of the errors $\sum \epsilon_{i}$ must equal zero because $n$ cannot be zero.
+
+# Problem 1.19
+
+Load the data.
+
+```{r}
+CH01PR19 <- read.table("~/GitHub/MA-4710/Homework 2/CH01PR19.txt", 
+                       quote="\"", comment.char="")
+```
+
+## Part A
+
+```{r}
+model <- lm(V1~V2, data = CH01PR19)
+model
+```
+
+The least square estimate for $\beta_{0}$ is 2.11405. The least square estimate for $\beta_{1}$ is 0.3883. Therefore the estimated regression function is $\hat{Y}_{i} =  2.11405 +  0.03883 \times X_{i} + \epsilon_{i}$.
+
+## Part B
+
+```{r}
+plot(x = CH01PR19$V2, 
+     y = CH01PR19$V1,
+     xlab = "ACT Score",
+     ylab = "GPA",
+     main = "ACT Scores vs GPAs")
+abline(model)
+```
+
+The regression appears to fit the data. The data is not very correlated and the variance of the response variable appears to be quite large. 
+
+## Part C
+
+The point estimate where $X=30$ is expressed as $Y_{30} = 2.11405 + 0.03883(30) = 3.2794$
+
+## Part D
+
+The point estimate of the change in the mean response when the entrance test score increases by one point is  $\beta_{1} = 0.03883$.
+
+# Problem 1.23
+
+We will use the data set `CH01PR19` from problem 1.19. 
+
+## Part A
+
+```{r}
+model <- lm(V1~V2, data = CH01PR19)
+resids <- residuals(model)
+sum(resids)
+```
+
+The sum of the residuals is approximately zero. By a rounding error, we can say that the sum of the residuals is zero.
+
+## Part B
+
+We will find the variance $\sigma^2$ and standard deviation $\sigma$ for the responce variable, GPA. In the case of the data set `CH01PR19`, the responce is `V1`.
+
+```{r}
+var(CH01PR19$V1)
+sd(CH01PR19$V1)
+```
+
+The variance is $\sigma^2 = 0.4151719$. The stand deviation $\sigma = 0.6443383$. The standard deviation is expressed in the same units as the response variable, GPA.
+
+# Problem 2.24
+
+We will use the data set `CH01PR19` from problem 1.19. 
+
+## Part A
+
+Use `R` to create the linear model and confidence interval.
+
+```{r}
+model <- lm(V1~V2, data = CH01PR19)
+confint(model, level=0.99)
+```
+
+From the output above, we see that the 99\% confidence interval for $\beta_{1}$ is between 0.005385614 and 
+ 0.07226864. We can bet 99\% confident that the expected GPA increase between 0.005385614 and 0.07226864 for each unit increase in the ACT score.
+ 
+Zero is not in the confidence interval. If zero was included in the confidence interval, the director of admissions could assume (with 99\% confidence) that there is not positive linear increase in GPA with respect to ACT score.
+
+## Part B
+
+Establish the hypothesis.
+
+\begin{align*}
+H_{0} &: \beta_{1} = 0 \\
+H_{1} &: \beta_{1} \ne 0 
+\end{align*}
+
+Calculate $t^{*}$ using the linear regression model `model` from part A. Set $\beta_{1} = 0$ under $H_{0}$.
+
+```{r}
+beta1=0  # under H0
+tstar=(summary(model)$coefficients[2,1]-beta1)/summary(model)$coefficients[2,2]
+tstar
+```
+
+Calculate the degrees of freedom.
+
+```{r}
+df=length(CH01PR19$V1)-2
+df
+```
+
+Find the t-value with two sided 0.01 significance. 
+
+```{r}
+abs(qt(0.01/2, df = length(CH01PR19$V1)-2))
+```
+
+
+Because $t^*$ is greater than the critical value, we reject the null hypothesis that $\beta_{1} = 0$.
+
+# Part C
+
+```{r}
+pvalue=2*(1-pt(tstar,df))
+pvalue
+```
+
+The p-value from part B is 0.002916604. This is less than 0.01, which supports the rejection of the null hypothesis.
+
+# Problem 2.7
+
+Load the data
+
+```{r}
+CH01PR22 <- read.table("~/GitHub/MA-4710/Homework 2/CH01PR22.txt", quote="\"", comment.char="")
+```
+
+# Part A
+
+```{r}
+model <- lm(V1~V2, data = CH01PR22)
+model
+confint(model, level=0.99)
+```
+
+The mean hardness when the elapsed time increases by one hour is 2.034 Brinell units. The 99\% confidence interval is between 1.765287 and 2.303463. This means that we can be 99\% confident that the increase in hardness over an hour will be between 1.765 and 2.303. 
+
+# Part B
+
+State the hypothesis:
+
+\begin{align*}
+H_{0} &: \beta_{1} = 2 \\
+H_{1} &: \beta_{1} \ne 2 
+\end{align*}
+
+
+```{r}
+t.test(CH01PR22$V1, alternative = "two.sided", mu = 2, conf.level = 0.99)
+```
+
+We will determine the test if the p-value is less than the 0.01. In this test, the p-value is 2.2e-16 which is much less than 0.01. Therefore, we reject the null hypothesis. This means that the mean hardness does not increase by 2 Brinell units per hour.
+
+
