@@ -1,0 +1,196 @@
+---
+title: "MA 4710 Homework 5"
+author: "Benjamin Hendrick"
+date: "February 25, 2016"
+output: 
+  pdf_document:
+    fig_caption: yes
+---
+
+# Problem 3.4
+
+Load the data into `R` and rename the variables.
+
+```{r}
+CH03PR03 <- read.table("~/GitHub/MA-4710/Homework 5/CH03PR03.txt", quote="\"", comment.char="")
+names(CH03PR03) <- c("gpa","act","intel","rank")
+```
+
+## Part F
+
+Obtain and residuals from the linear model between $Y$ and $X_{1}$. 
+
+```{r}
+gpa.lm <- lm(gpa~act, data= CH03PR03)
+gpa.resid <- resid(gpa.lm)
+```
+
+Plot the residuals against the intelligence score $X_{2}$.
+
+```{r, fig.cap="Scatter plot of residuals against the intelligence score $X_{2}$ \\label{intel.resid}"}
+plot(x = CH03PR03$intel, y = gpa.resid,
+     xlab = "Intelligence Score",
+     ylab = "Residuals",
+     main = "Residuals against Intelligence Score")
+```
+
+Figure \ref{intel.resid} suggests that there is a correlation between the error terms and the intelligence score. Therefore, the model wouldn't be improved by this correlation.
+
+Plot the residuals against the class rank $X_{3}$.
+
+```{r, fig.cap="Scatter plot of residuals against the class rank $X_{3}$ \\label{rank.resid}"}
+plot(x = CH03PR03$rank, y = gpa.resid,
+     xlab = "Class Rank",
+     ylab = "Residuals",
+     main = "Residuals of Rank")
+```
+
+Figure \ref{rank.resid} suggests that there is no correlation between the error terms and the class rank. Therefore, the model may benefit by including the class rank variable.
+
+# Problem 3.15
+
+Load the data into `R` and rename the variables.
+
+```{r}
+CH03PR15 <- read.table("~/GitHub/MA-4710/Homework 5/CH03PR15.txt", quote="\"", comment.char="")
+names(CH03PR15) <- c("conc", "time")
+```
+
+## Part A
+
+Fit the linear regression function using the `lm` function.
+
+```{r}
+chem.lm <- lm(conc~time, data = CH03PR15)
+```
+
+## Part B
+
+Use the `anova` function to perform the F test to determine wheter or not the lack of fit of the linear regression.
+
+```{r}
+anova(chem.lm)
+```
+
+Let $H_{0} : \beta = 0$ and $H_{1} : \beta \ne 0$. 
+
+Because the p-value is significantly smaller than $\alpha = 0.025$, we reject $H_{0}$ and conclude that the slope $\beta$ is not zero and the model is a good fit for the data.
+
+## Part C
+
+The test in Part B does not indicate what regression function is appropriate when it leads to the conclusion that lack of fit of a linear regression function exists.
+
+# Problem 3.16
+
+Use the same `CH03PR15` from Problem 3.15.
+
+## Part A
+
+Plot the data in a scatter plot.
+
+```{r, fig.cap="Scatter plot of concentration of solution over time.\\label{chem.scatter}"}
+plot(x = CH03PR15$time, y = CH03PR15$conc, 
+     xlab = "Time",
+     ylab = "Concentration of Solution",
+     main = "Concentration of Solution over Time") # try log transformation
+```
+
+Figure \ref{chem.scatter} suggests that a $log$ transformation is necessary because the data has a negative exponential trend and is heteroscedastic. 
+
+## Part B
+
+Conduct a Box-Cox transformation on the data where $\lambda = -.2, -.1, 0 , .1, .2$. 
+
+```{r}
+gmean <- exp(mean(log(CH03PR15$conc))) 
+sse <- NULL 
+lambda <- NULL 
+i <- 1 
+for (lam in seq(-0.2,0.2,0.1)){ 
+  if (lam != 0){
+  tY <- (CH03PR15$conc^lam - 1) / (lam*gmean^(lam-1))
+} else {
+  tY <- log(CH03PR15$conc)*gmean
+} 
+  test <- anova(lm(tY~CH03PR15$time)) 
+  sse[i] <- test['Residuals','Sum Sq'] 
+  lambda[i] <- lam 
+  i <- i+1
+} 
+```
+
+The SEE values for each $\lambda$ value are:
+
+$\lambda$ | SSE
+----------|------
+-.2       | `r sse[1]`
+-.1       | `r sse[2]`
+0         | `r sse[3]`
+.1        | `r sse[4]`
+.2        | `r sse[5]`
+
+Select $\lambda = 0$ because it has the smallest SSE. This can also be confirmed in `R`. 
+
+```{r}
+lambda[which.min(sse)] 
+```
+
+```{r, fig.cap="SSE values for different lambda values of the Box-Cox transformation \\label{chem.box}"}
+plot(lambda,sse,type="o",
+     main="Box-Cox Transform",
+     xlab = "Lambda",
+     ylab = "SSE") 
+```
+
+Based on the table above and Figure \ref{chem.box}, we should select $\lambda = 0$ and therefore use a $log$ transformation on the data. This supports the decision in Part A.
+
+## Part C
+
+Create a new column of $log$ transformed values. 
+
+```{r}
+CH03PR15$logConc <- log(CH03PR15$conc)
+```
+
+Obtain the estimated linear regression function for the transformed data.
+
+```{r}
+logConc.lm <- lm(logConc~time, data = CH03PR15)
+```
+
+## Part D
+
+Plot the transformed data against its linear model found in Part C.
+
+```{r, fig.cap="Plot of the transformed data against its linear model.\\label{log.plot}"}
+plot(x = CH03PR15$time,
+     y = CH03PR15$logConc,
+     xlab = "Time",
+     ylab = "Solution Concentration (Log Scale)",
+     main = "Solution Concentration over Time")
+abline(logConc.lm)
+```
+
+Figure \ref{log.plot} suggests that the transformed data fits the regression model very well.
+
+## Part E
+
+Plot the residuals against their fitted values
+
+```{r, fig.cap = "Residuals plotted against fitted values.\\label{resid.fit}"}
+plot(logConc.lm, which=1)
+```
+
+Plot the normal probability plot of the residuals.
+
+```{r, fig.cap = "Normal probability plot of the residuals. \\label{resid.qq}"}
+plot(logConc.lm, which=2)
+```
+
+The plots (Figure \ref{resid.fit} and Figure \ref{resid.qq}) suggest that the residuals have a high variance and are not normally distributed.
+ 
+## Part F
+
+The transformed estimated regression function is expressed as $$E(log(Y)) = 1.5079 - 0.4499 X$$
+
+The orignal estimated regression function can be expressed $$E(Y) = 10^{1.5079} - 10^{0.4499^{X}} = 32.2033 - 2.81773^{X}$$
