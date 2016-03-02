@@ -1,0 +1,150 @@
+---
+title: "MA 4710 Homework 6"
+author: "Benjamin Hendrick"
+date: "March 1, 2016"
+output: pdf_document
+---
+
+# Problem 4.5
+
+Load the data into `R` and rename the variables.
+
+```{r}
+filePath <- "~/GitHub/MA-4710/Homework 6/CH01PR22.txt"
+CH01PR22 <- read.table(filePath, quote="\"", comment.char="")
+names(CH01PR22)[1] <- "hardness"
+names(CH01PR22)[2] <- "time"
+```
+
+## Part A
+
+Create the linear model using the `lm` function and find the coefficients with the `summary` function.
+
+```{r}
+plastic.lm <- lm(hardness ~ time, data = CH01PR22)
+plastic.coef <- summary(plastic.lm)$coefficients         
+alpha <- 0.1
+```
+
+Compute the Bonferroni join confidence intervals for $\beta_{0}$ and $\beta_{1}$, using a 90 percent family confidence coefficient.
+
+```{r}
+B <- qt(1-alpha/(2*2),plastic.lm$df.residual) 
+BCI <- cbind(plastic.coef[,1]-B*plastic.coef[,2],
+             plastic.coef[,1]+B*plastic.coef[,2]) 
+colnames(BCI) <- c("Lower Bound","Upper Bound") 
+```
+
+The confidence interval for the intercept $\beta_{0}$ is (`r BCI[1,1]`, `r BCI[1,2]`). We conclude that the intercept $\beta_{0}$ has a 90 percent chance of being between `r BCI[1,1]` and `r BCI[1,2]`.
+
+The confidence interval for the slope $\beta_{1}$ is (`r BCI[2,1]`, `r BCI[2,2]`).  We conclude that the slope $\beta_{1}$ has a 90 percent chance of being between `r BCI[2,1]` and `r BCI[2,2]`.
+
+
+# Problem 4.9
+
+## Part A
+
+Using the data from Problem 4.5, create the 90 percent confidence interval Bonferroni bands at 20, 30, and 40 hours.
+
+```{r}
+CI <- predict(plastic.lm,newdata=data.frame(time=c(20,30,40)),se.fit=TRUE) 
+g <- 3
+B <- qt(1-alpha/(2*g),plastic.lm$df.residual) 
+BBand <- cbind( CI$fit - B * CI$se.fit, CI$fit + B * CI$se.fit )
+BBand
+```
+
+The confidence interval at 20 hours is (`r BBand[1,1]`, `r BBand[1,2]`). We conclude that at 20 hours, the estimate has a 90 chance of being between `r BBand[1,1]` and `r BBand[1,2]`.
+
+The confidence interval at 30 hours is (`r BBand[2,1]`, `r BBand[2,2]`). We conclude that at 30 hours, the estimate has a 90 chance of being between `r BBand[2,1]` and `r BBand[2,2]`.
+
+The confidence interval at 40 hours is (`r BBand[3,1]`, `r BBand[3,2]`). We conclude that at 40 hours, the estimate has a 90 chance of being between `r BBand[3,1]` and `r BBand[3,2]`.
+
+## Part C
+
+Create the the 90 percent confidence interval Working-Hotelling bands at 30 and 40.
+
+```{r}
+CI <- predict(plastic.lm,newdata=data.frame(time=c(30,40)),se.fit=TRUE)
+              
+W <- sqrt(2*qf(0.90,length(plastic.lm$coefficients),plastic.lm$df.residual))
+WHBand <- cbind( CI$fit - W * CI$se.fit, CI$fit + W * CI$se.fit )
+```
+
+The confidence interval at 30 hours is (`r WHBand[1,1]`, `r WHBand[1,2]`). We conclude that at 30 hours, the estimate has a 90 chance of being between `r WHBand[1,1]` and `r WHBand[1,2]`.
+
+The confidence interval at 40 hours is (`r WHBand[2,1]`, `r WHBand[2,2]`). We conclude that at 40 hours, the estimate has a 90 chance of being between `r WHBand[2,1]` and `r WHBand[2,2]`.
+
+Create the the 90 percent confidence interval Bonferroni bands at 30 and 40.
+
+```{r}
+g <- 2
+B <- qt(1-alpha/(2*g),plastic.lm$df.residual) 
+BBand <- cbind( CI$fit - B * CI$se.fit, CI$fit + B * CI$se.fit )
+BBand
+```
+
+The confidence interval at 30 hours is (`r BBand[1,1]`, `r BBand[1,2]`). We conclude that at 30 hours, the estimate has a 90 chance of being between `r BBand[1,1]` and `r BBand[1,2]`.
+
+The confidence interval at 40 hours is (`r BBand[2,1]`, `r BBand[2,2]`). We conclude that at 40 hours, the estimate has a 90 chance of being between `r BBand[2,1]` and `r BBand[2,2]`.
+
+Based on the above confidence intervals, the Bonferroni model is the most efficient because it has the smallest confience bands.
+
+# Problem 5.1
+
+Define the matrices $A$, $B$, and $C$ in `R`. 
+
+```{r}
+A <- matrix(c(1,2,3,4,6,8),3,2)
+B <- matrix(c(1,1,2,3,4,5),3,2)
+C <- matrix(c(3,5,8,4,1,0),2,3)
+```
+
+Perform the matrix arithmetic in `R` to compute $A+B$, $A-B$, $AC$, $AB'$, and $B'A$.
+
+Note that the function `t(A)` in `R` is equivalent to $A^{T}$ and `A %*% B` is equivalent to $AB$. 
+
+```{r}
+A+B #A+B
+A-B #A-B
+A %*% C #AC
+A %*% t(B) #AB'
+t(B) %*% A #B'A
+```
+
+
+# Problem 5.5
+
+Load the data into `R` and rename the variables. 
+
+```{r}
+filePath <- "~/GitHub/MA-4710/Homework 6/CH05PR05.txt"
+CH05PR05 <- read.table(filePath, quote="\"", comment.char="")
+names(CH05PR05)[1] <- "city"
+names(CH05PR05)[2] <- "loans"
+```
+
+Put the $X$ and $Y$ values into their respective matrices. $\textbf{Y}$ is a $6\times 1$ matrix. $\textbf{X}$ is a $6\times 2$ matrix. The first column of $\textbf{X}$ is all 1's and the second column is the values of $X$.
+
+```{r}
+Y <- matrix(CH05PR05$loans, 6,1)
+X <- matrix(c(1,1,1,1,1,1,CH05PR05$city), 6,  2)
+```
+
+Perform the matrix arithmetic in `R` to compute $Y'Y$, $XX'$, and $X'Y$.
+
+```{r}
+t(Y) %*% Y #Y'Y
+X %*% t(X) #XX'
+t(X) %*% Y #X'Y
+```
+
+# Problem 5.13
+
+Use the same data from Problem 5.5: `CH05PR05`.
+
+Perform the matrix arithmetic in `R` to compute $(X'X)^{-1}$.
+
+```{r}
+(t(X) %*% X)^(-1) #(X'X)^-1
+```
