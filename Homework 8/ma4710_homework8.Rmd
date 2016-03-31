@@ -1,0 +1,127 @@
+---
+title: "MA 4710 Homework 8"
+author: "Benjamin Hendrick"
+date: "March 30, 2016"
+output: pdf_document
+---
+
+# Problem 6.5
+
+```{r}
+brand <- read.table("~/GitHub/MA-4710/Homework 8/brand.txt", 
+                    quote="\"", comment.char="")
+names(brand) <- c("Yi","Xi1", "Xi2")
+```
+
+## Part A
+```{r}
+pairs(brand, main = "Scatterplot Matrix")
+cor(brand) 
+```
+
+According to the correlation matrix, there is no correlation between $X_{i1}$ and $X_{i2}$. 
+
+## Part B
+```{r}
+brand.lm <- lm(Yi ~ Xi1 + Xi2, data=brand)
+```
+
+The estimated regression function is $\hat{Y}_{i} = 37.65 + 4.425 X_{i1} + 4.375 X_{i2}$. $b_{1}$ provides the dependency of the moisture content and brand liking. For every increase in brand liking, the moisture content increases by 4.425.
+
+## Part C
+```{r}
+brand.lm.resid <-resid(brand.lm)
+boxplot(brand.lm.resid, main = "Box Plot of Residuals", ylab= "Residuals")
+```
+
+The redisuals appear to be symmetrically distributed around zero and have zero mean.
+
+## Part D
+
+```{r}
+# Resid vs Yi
+plot(x = brand.lm.resid, y = brand$Yi,
+     xlab = "Residuals", ylab = "Yi", 
+     main = "Residuals vs. Yi")
+
+# Resid vs Xi1
+plot(x = brand.lm.resid, y = brand$Xi1,
+     xlab = "Residuals", ylab = "X1",
+     main = "Residuals vs. Xi1")
+
+# Resid vs. Xi2
+plot(x = brand.lm.resid, y = brand$Xi2,
+     xlab = "Residuals", ylab = "X2",
+     main = "Residuals vs. Xi2")
+
+# Resid vs. Xi1 * Xi2
+plot(x = brand.lm.resid, y = brand$Xi1 * brand$Xi2,
+     xlab = "Residuals", ylab = "X1X2",
+     main = "Residuals vs. X1X2")
+```
+
+The residual plots have a uniform spread across all veriables.
+
+```{r}
+qqnorm(brand.lm.resid)
+qqline(brand.lm.resid)
+```
+
+The normal probability plot suggests that the residuals are normally distributed.
+
+## Part E
+```{r}
+library(lmtest)
+bptest(Yi ~ Xi1 + Xi2, data = brand)
+```
+
+$H_{0}: \upsilon_{1} = 0$ vs. $H_{a}: \upsilon_{1} \ne 0$. 
+
+Because the p-value, `r bptest(Yi ~ Xi1 + Xi2, data = brand)$p.value`,is greater than 0.01, we fail to reject $H_{0}$, proving that the error variance is constant.
+
+# Problem 6.6
+## Part A
+```{r}
+summary(brand.lm)
+```
+
+$H_{0}: \beta_{i} = 0$ vs. $H_{1}: \beta_{i} \ne = 0$.
+
+From the `summary` function, we find that the p-value for $\beta_{1}$, $1.78 \times 10^{-9}$, is less than $\alpha = 0.1$. Therefore we reject $H_{0}$ proving that $\beta_{1} \ne 0$. 
+
+The p-value for $\beta_{2}$, $2.01 \times 10^{-5}$, is less than $\alpha = 0.1$. Therefore we reject $H_{0}$ proving that $\beta_{2} \ne 0$. 
+
+## Part B
+The p-values from of the test in Part A are $1.20 \times 10^{-8}, 1.78 \times 10^{-9}, 2.01 \times 10^{-5}$ for $\beta_{0}$, $\beta_{1}$, and $\beta_{2}$, respectively.
+
+## Part C
+```{r}
+coef <- summary(brand.lm)$coefficients          # Statement Confidence Level
+alpha <- 0.01 	 			        # alpha : significance level
+
+B <- qt(1-alpha/(2),brand.lm$df.residual)
+BCI <- cbind(coef[,2]-B*coef[,3],coef[,2]+B*coef[,3])
+colnames(BCI) <- c("Lower Bound","Upper Bound")
+BCI[2:3,]
+```
+
+The bounds of the Bonferroni procedure for $X_{i1}$ are (`r BCI[2,]`). The bounds of the Bonferroni procedure for $X_{i2}$ are (`r BCI[3,]`). 
+
+# Problem 6.7
+
+## Part A
+The coefficient of multiple determintaiton $R^{2}$ from the `summary` function is `r summary(brand.lm)$r.squared`. The $R^{2}$ implies that the model is well fitted and useful.
+
+## Part B
+```{r}
+yHat <- predict(brand.lm)
+yBar <- mean(brand$Yi)
+sum((yHat-yBar)^2)/sum((brand$Yi-yBar)^2)
+```
+
+The coefficient of simple determination equals the coefficient of multiple regression $R^{2}$ 
+
+# Problem 6.8
+
+## Part A
+

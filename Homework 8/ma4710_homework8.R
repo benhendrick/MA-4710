@@ -44,9 +44,9 @@ library(lmtest)
 bptest(Yi ~ Xi1 + Xi2, data = brand)
 
 # Part F
-brand.lm.innter <- brand.lm
-brand.lm.outer <- lm(Yi ~ factor(Xi1) + factor(Xi2), data = brand)
-anova(brand.lm.innter, brand.lm.outer)#$`Pr(>F)`
+#brand.lm.innter <- brand.lm
+#brand.lm.outer <- lm(Yi ~ factor(Xi1) + factor(Xi2), data = brand)
+#anova(brand.lm.innter, brand.lm.outer)#$`Pr(>F)`
 
 # Problem 6.6
 
@@ -57,7 +57,13 @@ summary(brand.lm)#$r.squared
 # Use part A output
 
 # Part C
+coef <- summary(brand.lm)$coefficients          # Statement Confidence Level
+alpha <- 0.01 	 			        # alpha : significance level
 
+B <- qt(1-alpha/(2*2),brand.lm$df.residual)
+BCI <- cbind(coef[,2]-B*coef[,3],coef[,2]+B*coef[,3])
+colnames(BCI) <- c("Lower Bound","Upper Bound")
+BCI
 
 # Problem 6.7
 
@@ -73,4 +79,13 @@ sum((yHat-yBar)^2)/sum((brand$Yi-yBar)^2)
 # Problem 6.8
 
 # Part A
+yH <- coef[1] + 5*coef[2] + 4*coef[2]
+inalpha <- 0.01
+t <- qt(1-alpha/2, brand.lm$df.residual)
+s <- var(predict(brand.lm))
 
+yH - t*s
+yH + t*s
+
+# Part B
+yH <- coef[1] + predict(brand.lm)[5] + predict(brand.lm)[4]
