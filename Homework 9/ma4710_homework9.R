@@ -44,7 +44,7 @@ brand.trans.fit <- lm(tYi ~ -1 + tXi1 + tXi2, data = brand.trans)
 brand.trans.fit$coefficients # transformed X1 increases 0.8924 per standard deviation
 
 # Part C
-
+sd(fitted(brand.trans.fit))*fitted(brand.trans.fit)
 
 # Problem 7.24
 
@@ -53,4 +53,8 @@ brand.simple <- lm(Yi ~ Xi1, data = brand)
 brand.simple$coefficients
 
 # Part B
+brand.lm.6.5 <- lm(Yi ~ Xi1 + Xi2, data=brand)
 
+# Part C
+anova(brand.simple)[1,2]
+anova(brand.lm.6.5)[1,2]
