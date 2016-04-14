@@ -1,0 +1,208 @@
+---
+title: "MA 4710 Homework 10"
+author: "Benjamin Hendrick"
+date: "April 13, 2016"
+output: 
+  pdf_document:
+    highlight: null
+---
+
+# Problem 8.4
+
+Load the data and rename the variables.
+
+```{r}
+Muscle <- read.table("~/GitHub/MA-4710/Homework 10/Muscle.txt", quote="\"", comment.char="")
+names(Muscle) <- c("y","x")
+```
+
+## Part A
+
+Fit the regression model.
+
+```{r}
+muscle.fit <- lm(y~x+I(x^2), data = Muscle)
+```
+
+The regression model is $Y_{i} = 207.34961 - 2.96432x_{i} + 0.01484x_{i}^2$.
+
+Plot the fitted data with the regression line. 
+
+```{r}
+plot(Muscle$x, Muscle$y)
+x <- seq(40,80, by=0.01)
+y <- muscle.fit$coefficients[1] + muscle.fit$coefficients[2]*x + muscle.fit$coefficients[3]*x^2
+lines(x,y)
+```
+
+Find the $R^2$ value with the `summary` function.
+
+```{r}
+summary(muscle.fit)
+```
+
+$R^2=$ `r summary(muscle.fit)$r.squared`
+
+## Part B
+
+Test for regression relation is done with the `summary` function. 
+
+```{r}
+summary(muscle.fit)
+```
+
+Becasue the p-values for the intercept and $x$ are less than 0.05, there is no relation. However, because the p-value for $x^2$  is greater than 0.05, there is regression relation for this variable.
+
+## Part C
+
+```{r}
+x <- 48
+y <- muscle.fit$coefficients[1] + muscle.fit$coefficients[2]*x + muscle.fit$coefficients[3]*x^2
+newdata <- data.frame(y=y, x=x)
+predict(muscle.fit, newdata, interval = "confidence")
+```
+
+The estimated mean muscle mass for women aged 48 years is `r predict(muscle.fit, newdata, interval = "confidence")[1]`. The 95 percent confidence interval is (`r predict(muscle.fit, newdata, interval = "confidence")[2]`, `r predict(muscle.fit, newdata, interval = "confidence")[3]`). This means that we can be 95 confident that the mean muscle mass for women aged 48 is between these two bounds.
+
+## Part D
+
+```{r}
+predict(muscle.fit, newdata, interval = "predict")
+```
+
+The predicted muscle mass for women aged 48 years is `r predict(muscle.fit, newdata, interval = "predict")[1]`. The 95 percent confidence interval is (`r predict(muscle.fit, newdata, interval = "predict")[2]`, `r predict(muscle.fit, newdata, interval = "predict")[3]`). This means that we can be 95 confident that the predicted muscle mass for women aged 48 is between these two bounds.
+
+## Part E
+
+```{r}
+muscle.fit.simple <- lm(y~x, data = Muscle)
+anova(muscle.fit.simple, muscle.fit)
+```
+
+The null hypothesis is $H_{0} : \beta_{0} = \beta_{1} = \beta_{2}$. The alternative hypothesis is $H_{a} : \beta_{i} \ne \beta{j} \text{ for some } i \ne j$. We reject $H_{0}$ if the p-value is less than $\alpha = 0.05$. 
+
+We fail to reject $H_{0}$ becasue the $0.08109 > 0.05$. This means that we can drop the quadratic term from the regression model.
+
+## Part F
+
+Use the quadratic formula to find the regression model in terms of $x$.
+
+$$ x = \frac{2.96 \pm \sqrt{(-2.96)^2-4(207.35)(0.015)+4(0.015)(y)}}{2(207.35)}$$
+
+# Problem 8.5
+
+Use the data and regression model from Problem 8.4.
+
+## Part A
+
+Find the residuals.
+
+```{r}
+muscle.fit.resid <- residuals(muscle.fit)
+```
+
+Plot the residuals against the fitted values.
+
+```{r}
+plot(fitted(muscle.fit), muscle.fit.resid, main = "Fitted vs Residuals",
+     xlab = "Fitted Values", ylab = "Residuals")
+```
+
+There is nothing out of the ordinary with this plot.
+
+Plot the residuals against the $x$ values.
+
+```{r}
+plot(muscle.fit.resid, main = "x vs Residuals",
+     xlab = "x", ylab = "Residuals")
+```
+
+There is nothing out of the ordinary with this plot.
+
+Plot the Q-Q plot of the residuals.
+
+```{r}
+qqnorm(muscle.fit.resid)
+qqline(muscle.fit.resid)
+```
+
+The residuals appear to be normal, but with short tails.
+
+## Part B
+
+```{r}
+anova(muscle.fit)
+```
+
+The null hypothesis is $H_{0} : \beta_{0} = \beta_{1} = \beta_{2}$. The alternative hypothesis is $H_{a} : \beta_{i} \ne \beta{j} \text{ for some } i \ne j$. We reject $H_{0}$ if the p-value is less than $\alpha = 0.05$. 
+
+The p-value is significantly less than 0.05, therefore we reject $H_{0}$
+
+
+# Problem 8.16
+
+Load the data and rename the variables.
+
+```{r}
+gpa2 <- read.delim("~/GitHub/MA-4710/Homework 10/gpa2.txt", header=FALSE)
+names(gpa2) <- c("y", "x1", "x2")
+```
+
+## Part A
+
+The regression model is $Y_{i} = \beta_{0} + \beta_{1} x_{1} + \beta_{2} x_{2}^2$
+
+- $\beta_{0}$ is the intercept value of the GPA
+- $\beta_{1}$ is the rate of change of ACT scores per unit 
+- $\beta_{2}$ is the rate of change of change of major concetration per unit.
+
+## Part B
+
+```{r}
+gpa2.fit <- lm(y~x1+x2, data = gpa2)
+```
+
+The model is $Y_{i} = 2.198 + 0.038 x_{1}^2 - 0.094 x_{2}^2$
+
+## Part C
+
+```{r}
+gpa2.fit.simple <- lm(y~x1, data = gpa2)
+anova(gpa2.fit.simple, gpa2.fit)
+```
+
+The null hypothesis is $H_{0} : \beta_{0} = \beta_{1} = \beta_{2}$. The alternative hypothesis is $H_{a} : \beta_{i} \ne \beta{j} \text{ for some } i \ne j$. We reject $H_{0}$ if the p-value is less than $\alpha = 0.05$. 
+
+We fail to reject $H_{0}$ becasue the $0.4334 > 0.05$. This means that we can drop the quadratic term from the regression model.
+
+## Part D
+
+```{r}
+gpa2.fit.resid <- resid(gpa2.fit)
+plot(gpa2$x1*gpa2$x2, gpa2.fit.resid, main = "Residuals vs X1X2",
+     xlab = "X1X2", ylab = "Residuals")
+```
+
+The residuals are split into two clusters. Therefore, there is an interaction term.
+
+# Problem 8.20
+
+Use the data from Problem 8.20.
+
+## Part A
+
+```{r}
+gpa2.fit2 <- lm(y~x1+x2+x1*x2, data = gpa2)
+```
+
+The fitted regressional model is $Y_{i} = 3.23 - 0.003 x_{1} - 1.650 x_{2} + 0.062 x_{1}x_{2}$.
+
+## Part B
+
+```{r}
+anova(gpa2.fit, gpa2.fit2)
+```
+
+The null hypothesis is $H_{0} : \beta_{0} = \beta_{1} = \beta_{2}$. The alternative hypothesis is $H_{a} : \beta_{i} \ne \beta{j} \text{ for some } i \ne j$. We reject $H_{0}$ if the p-value is less than $\alpha = 0.05$. 
+
+We reject $H_{0}$ becasue the $0.02046 < 0.05$. This means that we cannot drop the quadratic term from the regression model.
